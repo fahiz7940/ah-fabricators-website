@@ -21,6 +21,15 @@ function updateThemeIcon(theme) {
   themeIcon.className = theme === "dark" ? "fas fa-sun" : "fas fa-moon";
 }
 
+// Scroll to Section Function
+function scrollToSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+
 // -----------------------------
 // Mobile Navigation
 // -----------------------------
