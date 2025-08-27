@@ -1,126 +1,125 @@
+// -----------------------------
 // Theme Toggle Functionality
-const themeToggle = document.getElementById("themeToggle")
-const body = document.body
-const themeIcon = themeToggle.querySelector("i")
+// -----------------------------
+const themeToggle = document.getElementById("themeToggle");
+const body = document.body;
+const themeIcon = themeToggle.querySelector("i");
 
-// Check for saved theme preference or default to light mode
-const currentTheme = localStorage.getItem("theme") || "light"
-body.setAttribute("data-theme", currentTheme)
-updateThemeIcon(currentTheme)
+// Load saved theme or default
+const currentTheme = localStorage.getItem("theme") || "light";
+body.setAttribute("data-theme", currentTheme);
+updateThemeIcon(currentTheme);
 
 themeToggle.addEventListener("click", () => {
-  const currentTheme = body.getAttribute("data-theme")
-  const newTheme = currentTheme === "dark" ? "light" : "dark"
-
-  body.setAttribute("data-theme", newTheme)
-  localStorage.setItem("theme", newTheme)
-  updateThemeIcon(newTheme)
-})
+  const newTheme = body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  body.setAttribute("data-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
+  updateThemeIcon(newTheme);
+});
 
 function updateThemeIcon(theme) {
-  if (theme === "dark") {
-    themeIcon.className = "fas fa-sun"
-  } else {
-    themeIcon.className = "fas fa-moon"
-  }
+  themeIcon.className = theme === "dark" ? "fas fa-sun" : "fas fa-moon";
 }
 
+// -----------------------------
 // Mobile Navigation
-const hamburger = document.getElementById("hamburger")
-const navMenu = document.querySelector(".nav-menu")
+// -----------------------------
+const hamburger = document.getElementById("hamburger");
+const navMenu = document.querySelector(".nav-menu");
 
 hamburger.addEventListener("click", () => {
-  navMenu.classList.toggle("active")
-  hamburger.classList.toggle("active")
-})
+  navMenu.classList.toggle("active");
+  hamburger.classList.toggle("active");
+});
 
-// Close mobile menu when clicking on a link
 document.querySelectorAll(".nav-link").forEach((link) => {
   link.addEventListener("click", () => {
-    navMenu.classList.remove("active")
-    hamburger.classList.remove("active")
-  })
-})
+    navMenu.classList.remove("active");
+    hamburger.classList.remove("active");
+  });
+});
 
-// Smooth scrolling for navigation links
-function scrollToSection(sectionId) {
-  const section = document.getElementById(sectionId)
-  if (section) {
-    section.scrollIntoView({ behavior: "smooth" })
+// -----------------------------
+// Scroll handling with throttling
+// -----------------------------
+const navbar = document.querySelector(".navbar");
+let ticking = false;
+
+window.addEventListener("scroll", () => {
+  if (!ticking) {
+    window.requestAnimationFrame(() => {
+      handleNavbarScroll();
+      updateActiveNavLink();
+      ticking = false;
+    });
+    ticking = true;
   }
+});
+
+function handleNavbarScroll() {
+  navbar.style.background = window.scrollY > 50
+    ? "rgba(45, 45, 45, 0.98)"
+    : "rgba(45, 45, 45, 0.95)";
 }
 
-// Update active navigation link based on scroll position
-window.addEventListener("scroll", () => {
-  const sections = document.querySelectorAll("section")
-  const navLinks = document.querySelectorAll(".nav-link")
+function updateActiveNavLink() {
+  const sections = document.querySelectorAll("section");
+  const navLinks = document.querySelectorAll(".nav-link");
+  let current = "";
 
-  let current = ""
   sections.forEach((section) => {
-    const sectionTop = section.offsetTop
-    const sectionHeight = section.clientHeight
-    if (scrollY >= sectionTop - 200) {
-      current = section.getAttribute("id")
+    if (window.scrollY >= section.offsetTop - 200) {
+      current = section.getAttribute("id");
     }
-  })
+  });
 
   navLinks.forEach((link) => {
-    link.classList.remove("active")
-    if (link.getAttribute("href") === `#${current}`) {
-      link.classList.add("active")
-    }
-  })
-})
+    link.classList.toggle("active", link.getAttribute("href") === `#${current}`);
+  });
+}
 
+// -----------------------------
 // Work Gallery Filter
-const categoryBtns = document.querySelectorAll(".category-btn")
-const workItems = document.querySelectorAll(".work-item")
+// -----------------------------
+const categoryBtns = document.querySelectorAll(".category-btn");
+const workItems = document.querySelectorAll(".work-item");
 
 categoryBtns.forEach((btn) => {
   btn.addEventListener("click", () => {
-    categoryBtns.forEach((b) => b.classList.remove("active"))
-    btn.classList.add("active")
+    categoryBtns.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
 
-    const category = btn.getAttribute("data-category")
-
+    const category = btn.getAttribute("data-category");
     workItems.forEach((item) => {
-      if (category === "all" || item.getAttribute("data-category") === category) {
-        item.style.display = "block"
-        setTimeout(() => {
-          item.style.opacity = "1"
-          item.style.transform = "scale(1)"
-        }, 100)
-      } else {
-        item.style.opacity = "0"
-        item.style.transform = "scale(0.8)"
-        setTimeout(() => {
-          item.style.display = "none"
-        }, 300)
-      }
-    })
-  })
-})
+      const match = category === "all" || item.dataset.category === category;
+      item.style.display = match ? "block" : "none";
+      // For smoother animations, you can use CSS transitions
+      item.style.opacity = match ? "1" : "0";
+      item.style.transform = match ? "scale(1)" : "scale(0.8)";
+    });
+  });
+});
 
-// ✅ Contact Form Handling with EmailJS
+// -----------------------------
+// Contact Form Handling (EmailJS)
+// -----------------------------
 const contactForm = document.getElementById("contactForm");
-
-emailjs.init("bMYIAnE-5vydl-CWs"); // Initialize with your Public Key
+emailjs.init("bMYIAnE-5vydl-CWs");
 
 contactForm.addEventListener("submit", (e) => {
   e.preventDefault();
-
   const submitBtn = contactForm.querySelector(".submit-btn");
   const originalText = submitBtn.innerHTML;
+
   submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
   submitBtn.disabled = true;
 
-  // Collect form data (these must match your EmailJS template variables)
   const formData = {
     from_name: contactForm.name.value,
     from_email: contactForm.email.value,
     phone: contactForm.phone.value,
     message: contactForm.message.value,
-    to_email: "ahfabricators1@gmail.com"  // Receiver (your client email)
+    to_email: "ahfabricators1@gmail.com"
   };
 
   emailjs.send("service_4vvqysg", "template_k1u5olg", formData)
@@ -130,88 +129,35 @@ contactForm.addEventListener("submit", (e) => {
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
     }, (error) => {
-      alert("❌ Oops! Something went wrong. Please try again.");
+      alert("❌ Something went wrong. Try again.");
       console.error(error);
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
     });
 });
 
-// Intersection Observer for animations
-const observerOptions = {
-  threshold: 0.1,
-  rootMargin: "0px 0px -50px 0px",
-}
-
+// -----------------------------
+// Intersection Observer for Animations
+// -----------------------------
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add("fade-in")
-    }
-  })
-}, observerOptions)
+    if (entry.isIntersecting) entry.target.classList.add("fade-in");
+  });
+}, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const animateElements = document.querySelectorAll(".work-item, .contact-item, .about-text, .about-image")
-  animateElements.forEach((el) => {
-    el.classList.add("loading")
-    observer.observe(el)
-  })
+  document.querySelectorAll(".work-item, .contact-item, .about-text, .about-image")
+    .forEach(el => observer.observe(el));
+});
 
-  setTimeout(() => {
-    animateElements.forEach((el) => {
-      el.classList.add("loaded")
-    })
-  }, 100)
-})
-
-// Navbar background change on scroll
-window.addEventListener("scroll", () => {
-  const navbar = document.querySelector(".navbar")
-  if (window.scrollY > 50) {
-    navbar.style.background = "rgba(45, 45, 45, 0.98)"
-  } else {
-    navbar.style.background = "rgba(45, 45, 45, 0.95)"
-  }
-})
-
-// Work item hover effects
+// -----------------------------
+// Work Item Hover & Click Effects
+// -----------------------------
 workItems.forEach((item) => {
-  item.addEventListener("mouseenter", () => {
-    item.style.transform = "translateY(-10px) scale(1.02)"
-  })
-
-  item.addEventListener("mouseleave", () => {
-    item.style.transform = "translateY(0) scale(1)"
-  })
-})
-
-// Work item click handler
-workItems.forEach((item) => {
+  item.addEventListener("mouseenter", () => item.style.transform = "translateY(-10px) scale(1.02)");
+  item.addEventListener("mouseleave", () => item.style.transform = "translateY(0) scale(1)");
   item.addEventListener("click", () => {
-    const img = item.querySelector("img")
-    const title = item.querySelector("h4").textContent
-    console.log(`Clicked on: ${title}`)
-  })
-})
-
-// Parallax effect for hero section
-window.addEventListener("scroll", () => {
-  const scrolled = window.pageYOffset
-  const hero = document.querySelector(".hero")
-  const rate = scrolled * -0.5
-
-  if (hero) {
-    hero.style.transform = `translateY(${rate}px)`
-  }
-})
-
-// Add loading states for images
-document.addEventListener("DOMContentLoaded", () => {
-  const images = document.querySelectorAll("img")
-  images.forEach((img) => {
-    img.addEventListener("load", () => {
-      img.classList.add("loaded")
-    })
-  })
-})
+    const title = item.querySelector("h4").textContent;
+    console.log(`Clicked on: ${title}`);
+  });
+});

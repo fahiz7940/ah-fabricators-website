@@ -250,9 +250,8 @@ body {
 
 /* About Section */
 .about {
-  margin-top: -140px;
+  padding: 40px 0px;
   background: var(--bg-secondary);
-  /* border: 3px solid; */
 }
 
 .about-content {
